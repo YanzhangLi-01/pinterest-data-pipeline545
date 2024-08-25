@@ -35,18 +35,15 @@ This project involves building a scalable, AWS-based data engineering pipeline t
 ## File Structure
 The project is organized as follows:
 ```python
-pinterest-data-pipeline/
-├── .gitignore
-├── 12c7b456b441_dag.py
-├── db_creds.yaml        
+pinterest-data-pipeline/       
+├── db_creds.yaml 
 ├── Key pair name.pem
-├── user_posting_emulation_streaming.py
 ├── user_posting_emulation.py
+├── user_posting_emulation_streaming.py
+├── pinterest_project_databricks.ipynb
+├── 12c7b456b441_dag.py
+├── .gitignore
 └── README.md
-
-├── config/                       
-│   └── db_creds.yaml              
-
 ```
 
 ## License Information
