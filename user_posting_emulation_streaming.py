@@ -77,9 +77,9 @@ def run_infinite_post_data_loop():
             print(user_result)
 
             # Define Kinesis stream names
-            pin_stream_name = "pinterest-data-stream"
-            geo_stream_name = "geolocation-data-stream"
-            user_stream_name = "user-data-stream"
+            pin_stream_name = "streaming-12c7b456b441-pin"
+            geo_stream_name = "streaming-12c7b456b441-geo"
+            user_stream_name = "streaming-12c7b456b441-user"
             
             # Send data to Kinesis streams
             send_to_kinesis(pin_stream_name, pin_result)
