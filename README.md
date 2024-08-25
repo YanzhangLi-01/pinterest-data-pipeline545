@@ -32,6 +32,28 @@ This project involves building a scalable, AWS-based data engineering pipeline t
 
 ## Usage Instructions
 
+### 1. Run the Pipeline
+
+#### Step 1: Execute the DAGs on Amazon MWAA
+- **Access Airflow UI**: Log in to the AWS Management Console, navigate to MWAA, and open the Airflow UI.
+- **Trigger the DAG**: Locate your DAG (e.g., `pinterest_dag`) and click the play button to trigger it manually.
+- **Monitor the Run**: Use the Airflow UI to track task execution and ensure the data is processed successfully.
+
+#### Step 2: Submit Spark Jobs on Databricks
+- **Log in to Databricks**: Access your Databricks workspace.
+- **Run Notebooks**: Navigate to your notebooks (e.g., `pinterest_project_databricks.ipynb`), open it, and click "Run All" to execute the cells.
+- **Automated Jobs**: If using MWAA for scheduling, the DAG will automatically trigger these jobs based on your setup.
+
+### 2. Monitor the Data Pipeline
+
+#### Step 1: Monitor with AWS CloudWatch
+- **Check Logs and Metrics**: Use CloudWatch to monitor logs and metrics related to your MWAA environment and Databricks jobs.
+
+#### Step 2: Validate Data Flow
+- **Check S3 Data Lake**: Verify that data is correctly stored in the S3 bucket.
+- **Check Kinesis Streams**: Ensure data is streaming correctly to the Kinesis data streams using the AWS Kinesis console.
+
+
 ## File Structure
 The project is organized as follows:
 ```python
