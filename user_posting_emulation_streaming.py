@@ -4,8 +4,7 @@ import random
 from time import sleep
 import sqlalchemy
 from sqlalchemy import text
-import boto3
-from botocore.exceptions import ClientError
+import requests
 
 random.seed(100)
 
@@ -31,17 +30,13 @@ class AWSDBConnector:
 # Instantiate the connector
 new_connector = AWSDBConnector()
 
-def send_to_kinesis(stream_name, data):
-    kinesis_client = boto3.client('kinesis')
+def send_to_kinesis_via_http(url, headers, payload):
     try:
-        response = kinesis_client.put_record(
-            StreamName=stream_name,
-            Data=json.dumps(data, default=str),
-            PartitionKey=str(random.randint(1, 1000))
-        )
-        print(f"Successfully sent data to {stream_name}: {response}")
-    except ClientError as e:
-        print(f"Failed to send data to Kinesis stream {stream_name}: {e}")
+        response = requests.request("PUT", url, headers=headers, data=payload, timeout=30)
+        response.raise_for_status()  # Raises an exception for HTTP errors
+        print(f"Successfully sent data: {response.text}")
+    except requests.exceptions.RequestException as e:
+        print(f"Failed to send data: {e}")
 
 def run_infinite_post_data_loop():
     while True:
@@ -81,10 +76,38 @@ def run_infinite_post_data_loop():
             print(geo_result)
             print(user_result)
 
-            # Send data to Kinesis streams using the send_to_kinesis function
-            send_to_kinesis("streaming-12c7b456b441-pin", pin_result)
-            send_to_kinesis("streaming-12c7b456b441-geo", geo_result)
-            send_to_kinesis("streaming-12c7b456b441-user", user_result)
+            # Prepare HTTP requests to send data to Kinesis streams
+            headers = {
+                'Content-Type': 'application/json'
+            }
+
+            # Define Kinesis HTTP endpoint URLs for different streams
+            pin_url = "https://4m0a2wpt0f.execute-api.us-east-1.amazonaws.com/dev/streams/streaming-12c7b456b441-pin/record"
+            geo_url = "https://4m0a2wpt0f.execute-api.us-east-1.amazonaws.com/dev/streams/streaming-12c7b456b441-geo/record"
+            user_url = "https://4m0a2wpt0f.execute-api.us-east-1.amazonaws.com/dev/streams/streaming-12c7b456b441-user/record"
+
+            pin_payload = json.dumps({
+                "StreamName": "streaming-12c7b456b441-pin",
+                "Data": pin_result,
+                "PartitionKey": "partition-1"
+            })
+
+            geo_payload = json.dumps({
+                "StreamName": "streaming-12c7b456b441-geo",
+                "Data": geo_result,
+                "PartitionKey": "partition-2"
+            })
+
+            user_payload = json.dumps({
+                "StreamName": "streaming-12c7b456b441-user",
+                "Data": user_result,
+                "PartitionKey": "partition-3"
+            })
+
+            # Send data to Kinesis streams via HTTP
+            send_to_kinesis_via_http(pin_url, headers, pin_payload)
+            send_to_kinesis_via_http(geo_url, headers, geo_payload)
+            send_to_kinesis_via_http(user_url, headers, user_payload)
 
 if __name__ == "__main__":
     run_infinite_post_data_loop()
