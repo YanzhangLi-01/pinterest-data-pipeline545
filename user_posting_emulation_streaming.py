@@ -1,16 +1,13 @@
 import yaml
 import json
-import requests
-from time import sleep
 import random
+from time import sleep
 import sqlalchemy
 from sqlalchemy import text
 import boto3
 from botocore.exceptions import ClientError
 
-
 random.seed(100)
-
 
 class AWSDBConnector:
 
@@ -39,7 +36,7 @@ def send_to_kinesis(stream_name, data):
     try:
         response = kinesis_client.put_record(
             StreamName=stream_name,
-            Data=json.dumps(data),
+            Data=json.dumps(data, default=str),
             PartitionKey=str(random.randint(1, 1000))
         )
         print(f"Successfully sent data to {stream_name}: {response}")
@@ -53,38 +50,41 @@ def run_infinite_post_data_loop():
         engine = new_connector.create_db_connector()
 
         with engine.connect() as connection:
-
+            # Fetch Pinterest data
             pin_string = text(f"SELECT * FROM pinterest_data LIMIT {random_row}, 1")
-            pin_selected_row = connection.execute(pin_string)
-            
-            for row in pin_selected_row:
+            pin_selected_rows = connection.execute(pin_string)
+            pin_result = {}
+            for row in pin_selected_rows:
                 pin_result = dict(row._mapping)
 
+            # Fetch Geolocation data
             geo_string = text(f"SELECT * FROM geolocation_data LIMIT {random_row}, 1")
-            geo_selected_row = connection.execute(geo_string)
-            
-            for row in geo_selected_row:
+            geo_selected_rows = connection.execute(geo_string)
+            geo_result = {}
+            for row in geo_selected_rows:
                 geo_result = dict(row._mapping)
 
+            # Fetch User data
             user_string = text(f"SELECT * FROM user_data LIMIT {random_row}, 1")
-            user_selected_row = connection.execute(user_string)
-            
-            for row in user_selected_row:
+            user_selected_rows = connection.execute(user_string)
+            user_result = {}
+            for row in user_selected_rows:
                 user_result = dict(row._mapping)
-            
+
+            # Convert datetime fields to ISO format
+            if 'timestamp' in geo_result:
+                geo_result['timestamp'] = geo_result['timestamp'].isoformat()
+            if 'date_joined' in user_result:
+                user_result['date_joined'] = user_result['date_joined'].isoformat()
+
             print(pin_result)
             print(geo_result)
             print(user_result)
 
-            # Define Kinesis stream names
-            pin_stream_name = "streaming-12c7b456b441-pin"
-            geo_stream_name = "streaming-12c7b456b441-geo"
-            user_stream_name = "streaming-12c7b456b441-user"
-            
-            # Send data to Kinesis streams
-            send_to_kinesis(pin_stream_name, pin_result)
-            send_to_kinesis(geo_stream_name, geo_result)
-            send_to_kinesis(user_stream_name, user_result)
+            # Send data to Kinesis streams using the send_to_kinesis function
+            send_to_kinesis("streaming-12c7b456b441-pin", pin_result)
+            send_to_kinesis("streaming-12c7b456b441-geo", geo_result)
+            send_to_kinesis("streaming-12c7b456b441-user", user_result)
 
 if __name__ == "__main__":
     run_infinite_post_data_loop()
