@@ -55,7 +55,7 @@ This project involves building a scalable, AWS-based data engineering pipeline t
 
 
 ## File Structure
-The project is organized as follows:
+- Project Structure:
 ```python
 pinterest-data-pipeline/       
 ├── db_creds.yaml 
@@ -63,10 +63,13 @@ pinterest-data-pipeline/
 ├── user_posting_emulation.py
 ├── user_posting_emulation_streaming.py
 ├── pinterest_project_databricks.ipynb
+├── streaming_processing.ipynb
 ├── 12c7b456b441_dag.py
 ├── .gitignore
 └── README.md
 ```
+- Project Diagram
+![Project Structure](Data_pipeline_diagram.png)
 
 ## License Information
 This project is licensed under the MIT License - see the [LICENSE](https://github.com/git/git-scm.com/blob/main/MIT-LICENSE.txt)
